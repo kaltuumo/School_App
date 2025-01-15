@@ -14,11 +14,12 @@ class _LoginScreenState extends State<LoginScreen> {
   late String password;
   bool _isPasswordVisible = false; // Controls password visibility
   bool _isLoading = false;
+  String _emailErrorMessage = ''; // For email error message
+  String _passwordErrorMessage = ''; // For password error message
 
   void initState() {
     super.initState();
-    _isLoading =
-        false; // Ensure that loading is reset when the screen is recreated
+    _isLoading = false;
   }
 
   @override
@@ -56,15 +57,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 40),
                   TextField(
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                        labelText: "Email Address",
-                        labelStyle: TextStyle(color: Colors.black),
-                        prefixIcon: Icon(Icons.email),
-                        border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      labelText: "Email Address",
+                      labelStyle: TextStyle(color: Colors.black),
+                      prefixIcon: Icon(Icons.email),
+                      border: OutlineInputBorder(),
+                    ),
                     onChanged: (value) {
                       email = value;
+                      setState(() {
+                        _emailErrorMessage = ''; // Reset error when typing
+                      });
                     },
                   ),
+                  const SizedBox(height: 5),
+                  if (_emailErrorMessage.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.error,
+                          color: Colors.red,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          _emailErrorMessage,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 20),
                   TextField(
                     obscureText: !_isPasswordVisible, // Toggle visibility
@@ -89,8 +109,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     onChanged: (value) {
                       password = value;
+                      setState(() {
+                        _passwordErrorMessage = ''; // Reset error when typing
+                      });
                     },
                   ),
+                  const SizedBox(height: 5),
+                  if (_passwordErrorMessage.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.error,
+                          color: Colors.red,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          _passwordErrorMessage,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 20),
                   _isLoading
                       ? Center(
@@ -100,20 +138,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () async {
                             setState(() {
                               _isLoading = true;
+                              _emailErrorMessage = ''; // Reset email error
+                              _passwordErrorMessage =
+                                  ''; // Reset password error
                             });
                             try {
                               // Sign in with email and password
                               final userCredential =
                                   await _auth.signInWithEmailAndPassword(
-                                      email: email, password: password);
+                                email: email,
+                                password: password,
+                              );
                               final user = userCredential.user;
+
                               if (user != null) {
                                 // Fetch the user data from Firestore
                                 DocumentSnapshot userDoc = await _firestore
-                                    .collection(
-                                        'users') // Ensure the correct collection name
+                                    .collection('users')
                                     .doc(user.uid)
                                     .get();
+
                                 if (userDoc.exists) {
                                   // Get user role from Firestore
                                   String role = userDoc['role'];
@@ -184,26 +228,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                             } catch (e) {
-                              print("Error during login: $e");
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('Error'),
-                                  content:
-                                      Text('Login failed. Please try again.'),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Ok'))
-                                  ],
-                                ),
-                              );
-                            } finally {
                               setState(() {
                                 _isLoading = false;
                               });
+
+                              String errorMessage =
+                                  'Login failed. Please try again.';
+
+                              if (e is FirebaseAuthException) {
+                                if (e.code == 'user-not-found') {
+                                  setState(() {
+                                    _emailErrorMessage =
+                                        'Invalid User Please Try Again.';
+                                  });
+                                } else if (e.code == 'wrong-password') {
+                                  setState(() {
+                                    _passwordErrorMessage =
+                                        'Invalid password. Please try again.';
+                                  });
+                                } else if (e.code == 'invalid-email') {
+                                  setState(() {
+                                    _emailErrorMessage =
+                                        'The email address is not valid.';
+                                  });
+                                }
+                              }
+
+                              print("Error during login: $e");
                             }
                           },
                           style: ElevatedButton.styleFrom(
