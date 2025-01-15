@@ -22,7 +22,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isComfPasswordVisible = false;
   bool _isLoading = false;
 
-  // List of roles for dropdown
+  String _nameErrorMessage = '';
+  String _confPasswordErrorMessage =
+      ''; // Add error message for confirm password
   final List<String> _roles = ['Admin', 'Supervisor', 'Donor'];
 
   @override
@@ -61,25 +63,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 40),
                   TextField(
                     keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                        labelText: "Full Name",
-                        labelStyle: TextStyle(color: Colors.black),
-                        prefixIcon: Icon(Icons.person),
-                        border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      labelText: "Full Name",
+                      labelStyle: const TextStyle(color: Colors.black),
+                      prefixIcon: const Icon(Icons.person),
+                      border: const OutlineInputBorder(),
+                    ),
                     onChanged: (value) {
-                      name = value;
+                      setState(() {
+                        name = value;
+                        _nameErrorMessage = ''; // Reset error message
+                      });
                     },
                   ),
+                  if (_nameErrorMessage.isNotEmpty)
+                    Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(
+                          _nameErrorMessage,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 20),
                   TextField(
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                        labelText: "Email Address",
-                        labelStyle: TextStyle(color: Colors.black),
-                        prefixIcon: Icon(
-                          Icons.email,
-                        ),
-                        border: OutlineInputBorder()),
+                      labelText: "Email Address",
+                      labelStyle: TextStyle(color: Colors.black),
+                      prefixIcon: Icon(Icons.email),
+                      border: OutlineInputBorder(),
+                    ),
                     onChanged: (value) {
                       email = value;
                     },
@@ -89,9 +105,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: !_isPasswordvisible,
                     decoration: InputDecoration(
                       labelText: "Password",
-                      labelStyle: TextStyle(color: Colors.black),
-                      prefixIcon: Icon(Icons.lock),
-                      border: OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      prefixIcon: const Icon(Icons.lock),
+                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordvisible
@@ -114,9 +130,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: !_isComfPasswordVisible,
                     decoration: InputDecoration(
                       labelText: "Confirm Password",
-                      labelStyle: TextStyle(color: Colors.black),
-                      prefixIcon: Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isComfPasswordVisible
@@ -134,6 +150,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       confpassword = value;
                     },
                   ),
+                  if (_confPasswordErrorMessage.isNotEmpty)
+                    Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(
+                          _confPasswordErrorMessage,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 20),
 
                   // Role Selection Dropdown
@@ -141,9 +168,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     value: _selectedRole,
                     decoration: InputDecoration(
                       labelText: 'Select Role',
-                      labelStyle: TextStyle(color: Colors.black),
-                      prefixIcon: Icon(Icons.account_circle),
-                      border: OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      prefixIcon: const Icon(Icons.account_circle),
+                      border: const OutlineInputBorder(),
                     ),
                     onChanged: (newValue) {
                       setState(() {
@@ -171,50 +198,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         )
                       : ElevatedButton(
                           onPressed: () async {
-                            if (name.isEmpty ||
-                                email.isEmpty ||
+                            setState(() {
+                              _nameErrorMessage = '';
+                              _confPasswordErrorMessage =
+                                  ''; // Reset error messages
+                            });
+
+                            // Basic validation checks
+                            if (name.isEmpty) {
+                              setState(() {
+                                _nameErrorMessage = 'Full name is required';
+                              });
+                              return;
+                            }
+
+                            if (email.isEmpty ||
                                 password.isEmpty ||
                                 confpassword.isEmpty ||
                                 _selectedRole == null) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text("Error"),
-                                  content:
-                                      const Text('All fields must be filled!'),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text("Ok")),
-                                  ],
-                                ),
-                              );
+                              // showDialog(
+                              //   context: context,
+                              //   builder: (context) => const AlertDialog(
+                              //     title: Text("Error"),
+                              //     content: Text('Select!'),
+                              //   ),
+                              // );
                               return;
                             }
 
                             if (password != confpassword) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Error'),
-                                  content: const Text('Passwords do not match'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Ok'),
-                                    )
-                                  ],
-                                ),
-                              );
+                              setState(() {
+                                _confPasswordErrorMessage =
+                                    'Passwords do not match';
+                              });
                               return;
                             }
+
                             setState(() {
                               _isLoading = true;
                             });
+
                             try {
                               final newUser =
                                   await _auth.createUserWithEmailAndPassword(
@@ -262,21 +285,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               setState(() {
                                 _isLoading = false;
                               });
-                              print(e);
                               showDialog(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Error'),
-                                  content: const Text(
+                                builder: (context) => const AlertDialog(
+                                  title: Text('Error'),
+                                  content: Text(
                                       'Registration failed. Please try again.'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Ok'),
-                                    )
-                                  ],
                                 ),
                               );
                               return;

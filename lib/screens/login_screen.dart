@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late String password;
   bool _isPasswordVisible = false; // Controls password visibility
   bool _isLoading = false;
+
   String _emailErrorMessage = ''; // For email error message
   String _passwordErrorMessage = ''; // For password error message
 
