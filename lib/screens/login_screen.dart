@@ -7,7 +7,7 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with RouteAware {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String email;
@@ -18,9 +18,40 @@ class _LoginScreenState extends State<LoginScreen> {
   String _emailErrorMessage = ''; // For email error message
   String _passwordErrorMessage = ''; // For password error message
 
+  @override
   void initState() {
     super.initState();
     _isLoading = false;
+    email = '';
+    password = '';
+  }
+
+  @override
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Reset all fields when returning to the login screen
+    setState(() {
+      email = '';
+      password = '';
+      _emailErrorMessage = '';
+      _passwordErrorMessage = '';
+    });
+  }
+
+  // Reset error messages when the user starts typing
+  void _onEmailChanged(String value) {
+    email = value;
+    setState(() {
+      _emailErrorMessage = ''; // Reset email error when typing
+    });
+  }
+
+  void _onPasswordChanged(String value) {
+    password = value;
+    setState(() {
+      _passwordErrorMessage = ''; // Reset password error when typing
+    });
   }
 
   @override
@@ -64,12 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: Icon(Icons.email),
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (value) {
-                      email = value;
-                      setState(() {
-                        _emailErrorMessage = ''; // Reset error when typing
-                      });
-                    },
+                    onChanged: _onEmailChanged, // Call function on change
                   ),
                   const SizedBox(height: 5),
                   if (_emailErrorMessage.isNotEmpty)
@@ -108,12 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                     ),
-                    onChanged: (value) {
-                      password = value;
-                      setState(() {
-                        _passwordErrorMessage = ''; // Reset error when typing
-                      });
-                    },
+                    onChanged: _onPasswordChanged, // Call function on change
                   ),
                   const SizedBox(height: 5),
                   if (_passwordErrorMessage.isNotEmpty)
@@ -165,7 +186,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                   // Navigate based on the role
                                   if (role == 'Admin') {
-                                    Navigator.pushNamed(context, '/admin');
+                                    Navigator.pushNamed(
+                                        context, '/admindashboard');
                                   } else if (role == 'Donor') {
                                     Navigator.pushNamed(context, '/donor');
                                   } else if (role == 'Supervisor') {
@@ -228,6 +250,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 );
                               }
+
+                              // Clear email and password fields after successful login
+                              setState(() {
+                                _isLoading = false;
+                              });
                             } catch (e) {
                               setState(() {
                                 _isLoading = false;
@@ -240,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (e.code == 'user-not-found') {
                                   setState(() {
                                     _emailErrorMessage =
-                                        'Invalid User Please Try Again.';
+                                        'Invalid Email. Please Try Again.';
                                   });
                                 } else if (e.code == 'wrong-password') {
                                   setState(() {
