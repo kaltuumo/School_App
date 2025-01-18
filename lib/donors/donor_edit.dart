@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditDonor extends StatefulWidget {
+  const EditDonor({super.key});
+
   @override
   _EditDonorState createState() => _EditDonorState();
 }

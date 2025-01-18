@@ -5,6 +5,8 @@ class ForgotScreen extends StatelessWidget {
   final _auth = FirebaseAuth.instance;
   late String email;
 
+  ForgotScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 class RegisterScreen extends StatefulWidget {
   static const String id = "register_screen";
 
+  const RegisterScreen({super.key});
+
+  @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
@@ -246,41 +249,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               );
 
                               // Save user role to Firestore
-                              if (newUser != null) {
-                                await _firestore
-                                    .collection('users')
-                                    .doc(newUser.user?.uid)
-                                    .set({
-                                  'name': name,
-                                  'email': email,
-                                  'role': _selectedRole,
-                                  'uid': newUser.user?.uid,
-                                });
+                              await _firestore
+                                  .collection('users')
+                                  .doc(newUser.user?.uid)
+                                  .set({
+                                'name': name,
+                                'email': email,
+                                'role': _selectedRole,
+                                'uid': newUser.user?.uid,
+                              });
 
-                                setState(() {
-                                  _isLoading = false;
-                                });
+                              setState(() {
+                                _isLoading = false;
+                              });
 
-                                // Show success message
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Success'),
-                                    content: Text(
-                                        'User Registered as $_selectedRole Successfully!'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          Navigator.pushNamed(
-                                              context, '/login');
-                                        },
-                                        child: const Text('Ok'),
-                                      )
-                                    ],
-                                  ),
-                                );
-                              }
+                              // Show success message
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Success'),
+                                  content: Text(
+                                      'User Registered as $_selectedRole Successfully!'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.pushNamed(context, '/login');
+                                      },
+                                      child: const Text('Ok'),
+                                    )
+                                  ],
+                                ),
+                              );
                             } catch (e) {
                               setState(() {
                                 _isLoading = false;

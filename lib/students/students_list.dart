@@ -63,7 +63,7 @@ class _StudentsListState extends State<StudentsList> {
               ],
             ),
             const SizedBox(height: 20), // Space between the buttons
-            Container(
+            SizedBox(
               width: double
                   .infinity, // Makes the button take up the full width of the screen
               height: 50, // Set the height of the button
