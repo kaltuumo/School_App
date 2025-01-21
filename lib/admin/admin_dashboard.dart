@@ -1,46 +1,156 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: AdminDashboard(),
-  ));
-}
-
 class AdminDashboard extends StatelessWidget {
-  const AdminDashboard({super.key});
+  final List<String> imageData = [
+    "images/about.png",
+    "images/quiz.png",
+    "images/pdf.png",
+    "images/job.png",
+  ];
+
+  final List<String> titles = [
+    'QUIZ',
+    'PDF',
+    'Jobs',
+    'About',
+  ];
+  AdminDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final double height = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Grid of dashboard cards
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2, // 2 columns for the layout
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  _buildDashboardCard(
-                      context, 'Admin', Icons.admin_panel_settings),
-                  _buildDashboardCard(context, 'Donor', Icons.person),
-                  _buildDashboardCard(context, 'Supervisor', Icons.people_alt),
-                  _buildDashboardCard(context, 'Students', Icons.school),
-                ],
+      body: SingleChildScrollView(
+        child: Container(
+          color: Colors.indigo,
+          height: height,
+          width: width,
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(),
+                height: height * 0.25,
+                width: width,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 45, left: 30, right: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () {},
+                            child: Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white,
+                              image: DecorationImage(
+                                image: AssetImage(
+                                  "images/woman.png",
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20, left: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            "Dashboard",
+                            style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "Last Update: 21 January 2025",
+                            style: TextStyle(
+                              fontSize: 15,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.white54,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30)),
+                ),
+                height: height * 0.75,
+                width: width,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 70),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.1,
+                        mainAxisSpacing: 25),
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: imageData.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {},
+                        child: Container(
+                          margin:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                spreadRadius: 1,
+                                blurRadius: 6,
+                              )
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Image.asset(
+                                imageData[index],
+                                width: 100,
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      // Add BottomNavigationBar
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0, // Set default index
-        onTap: (index) {},
-        items: const <BottomNavigationBarItem>[
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -50,41 +160,13 @@ class AdminDashboard extends StatelessWidget {
             label: 'About',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
+            icon: Icon(Icons.settings),
             label: 'Setting',
           ),
         ],
-      ),
-    );
-  }
-
-  // Build individual dashboard cards (without functionality)
-  Widget _buildDashboardCard(
-      BuildContext context, String title, IconData icon) {
-    return Card(
-      elevation: 4,
-      color: Colors.blueAccent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 50,
-            color: Colors.white,
-          ),
-          SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+        backgroundColor: Colors.white54,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.black,
       ),
     );
   }
