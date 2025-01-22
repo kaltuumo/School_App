@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:school_app/donors/donor_create.dart';
 import 'package:school_app/donors/donor_edit.dart';
 import 'package:school_app/donors/donor_list.dart';
+import 'package:school_app/widgets/about.dart';
+import 'package:school_app/widgets/home_page.dart';
+import 'package:school_app/widgets/setting_page.dart';
 // import 'package:school_app/donors/donor_edit.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/login_screen.dart';
@@ -46,6 +49,10 @@ class MyApp extends StatelessWidget {
         '/admindashboard': (context) => AdminDashboard(),
         '/createdonor': (context) => CreateDonor(),
         '/editdonor': (context) => EditDonor(),
+        '/about': (context) => About(),
+        '/home': (context) => HomePage(),
+
+        '/setting': (context) => SettingPage(),
         // '/forget': (context) => ForgetScreen(),
         '/changepassword': (context) => ChangePasswordScreen(),
         // '/reset': (context) => ResetScreen(),
